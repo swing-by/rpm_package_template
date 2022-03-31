@@ -1,0 +1,59 @@
+Summary:   
+Name:      
+Version:   %{pkgver}
+Release:   1%{?dist}
+License:   
+Group:     System Environment/Daemons
+Source:    source.tar
+URL:       
+Prefix:    /
+AutoReqProv: no
+Requires: python36
+BuildRequires: python36-virtualenv
+Requires: percona-toolkit
+Requires: logrotate
+BuildArch: x86_64
+BuildRoot: %(mktemp -ud %{_tmppath}/%{name}-%{version}-%{release}-XXXXXX)
+
+%global __python %{python3}
+%undefine __arch_install_post
+%define _build_id_links none
+
+%description
+
+%prep
+
+%setup -n source
+
+%build
+python3 setup.py sdist
+virtualenv-3 /opt/
+/opt//bin/pip3 install dist/*.tar.gz
+
+%pre
+
+%install
+install -d -m 755 $RPM_BUILD_ROOT/opt/
+install -d -m 755 $RPM_BUILD_ROOT/usr/lib/systemd/system/
+install -d -m 755 $RPM_BUILD_ROOT/opt/
+install -d -m 755 $RPM_BUILD_ROOT/etc/logrotate.d
+install -d -m 755 $RPM_BUILD_ROOT/etc/sysconfig
+
+cp -Rp /opt//* $RPM_BUILD_ROOT/opt/
+install -m 644 etc/systemd/*.service $RPM_BUILD_ROOT/usr/lib/systemd/system/
+
+%clean
+
+rm -rf $RPM_BUILD_ROOT
+
+%post
+
+%preun
+
+%postun
+
+%files
+/usr/lib/systemd/system/*
+/etc/sysconfig/*
+
+%changelog
